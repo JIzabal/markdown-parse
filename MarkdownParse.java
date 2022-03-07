@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.commonmark.node.*;
+import org.commonmark.parser.Parser;
+
 public class MarkdownParse {
 
     static int findCloseParen(String markdown, int openParen) {
@@ -49,38 +52,11 @@ public class MarkdownParse {
         }
     }
     public static ArrayList<String> getLinks(String markdown) {
-        ArrayList<String> toReturn = new ArrayList<>();
-        // find the next [, then find the ], then find the (, then take up to
-        // the next )
-        int currentIndex = 0;
-        while(currentIndex < markdown.length()) {
-            int nextOpenBracket = markdown.indexOf("[", currentIndex);
-            int nextCodeBlock = markdown.indexOf("\n```");
-            if(nextCodeBlock < nextOpenBracket && nextCodeBlock != -1) {
-                int endOfCodeBlock = markdown.indexOf("\n```");
-                currentIndex = endOfCodeBlock + 1;
-                continue;
-            }
-            int nextCloseBracket = markdown.indexOf("]", nextOpenBracket);
-            int openParen = markdown.indexOf("(", nextCloseBracket);
-
-            // The close paren we need may not be the next one in the file
-            int closeParen = findCloseParen(markdown, openParen);
-            
-            if(nextOpenBracket == -1 || nextCloseBracket == -1
-                  || closeParen == -1 || openParen == -1) {
-                return toReturn;
-            }
-            String potentialLink = markdown.substring(openParen + 1, closeParen).trim();
-            if(potentialLink.indexOf(" ") == -1 && potentialLink.indexOf("\n") == -1) {
-                toReturn.add(potentialLink);
-                currentIndex = closeParen + 1;
-            }
-            else {
-                currentIndex = currentIndex + 1;
-            }
-        }
-        return toReturn;
+        Parser parser = Parser.builder().build();
+        Node node = parser.parse(markdown);
+        LinkVisitor visitor = new LinkVisitor();
+        node.accept(visitor);
+        return visitor.links;
     }
     public static void main(String[] args) throws IOException {
         File input = new File(args[0]);
@@ -98,5 +74,20 @@ public class MarkdownParse {
 
             linksMap.forEach((key, value) -> System.out.println(key + ": " + value));
         }
+    }
+}
+
+class LinkVisitor extends AbstractVisitor {
+    ArrayList<String> links = new ArrayList<>();
+
+    @Override
+    public void visit(Link link) {
+        // This is called for all Link nodes
+
+        // Add current link to list
+        links.add(link.getDestination());
+
+        // Descend into children
+        visitChildren(link);
     }
 }

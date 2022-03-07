@@ -1,30 +1,32 @@
+import java.util.ArrayList;
+
 import org.commonmark.node.*;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
 class TryCommonMark {
     public static void main(String[] args) {
-        // this part actually does the computation
+        // This part actually does the computation
         Parser parser = Parser.builder().build();
-        Node node = parser.parse("[a link](something.com())");
+        Node node = parser.parse("[a link](something.com())[a link](something.com())");
         LinkVisitor visitor = new LinkVisitor();
         node.accept(visitor);
-        System.out.println(visitor.linkCount);;  // 4
+        System.out.println(visitor.links);
     }
 }
 
-// this class can be defined anywhere in the file
+// This class can be defined anywhere in the file
 class LinkVisitor extends AbstractVisitor {
-    int linkCount = 0;
+    ArrayList<String> links = new ArrayList<>();
 
     @Override
     public void visit(Link link) {
-        // This is called for all Text nodes. Override other visit methods for other node types.
+        // This is called for all Link nodes
 
-        // Count words (this is just an example, don't actually do it this way for various reasons).
-        linkCount++;
+        // Add current link to list
+        links.add(link.getDestination());
 
-        // Descend into children (could be omitted in this case because Text nodes don't have children).
+        // Descend into children
         visitChildren(link);
     }
 }

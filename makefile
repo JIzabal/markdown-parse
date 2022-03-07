@@ -5,7 +5,7 @@ test: MarkdownParse.class MarkdownParseTest.class
 
 # Use -g for jdb
 MarkdownParse.class: MarkdownParse.java
-	javac MarkdownParse.java
+	javac -cp $(CLASSPATH) MarkdownParse.java
 
 # Use -g for jdb
 MarkdownParseTest.class: MarkdownParseTest.java
