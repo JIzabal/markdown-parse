@@ -26,7 +26,7 @@ class LinkVisitor extends AbstractVisitor {
         // Add current link to list
         links.add(link.getDestination());
 
-        // Descend into children
+        // Descend into children (could be omitted in this case because Link nodes can't have Link nodes)
         visitChildren(link);
     }
 }
